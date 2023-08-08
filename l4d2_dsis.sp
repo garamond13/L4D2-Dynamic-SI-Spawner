@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.1.1"
+#define PLUGIN_VERSION "1.2.0"
 
 #define DEBUG 0
 
@@ -40,6 +40,7 @@ Handle h_si_spawn_size_per_survivor;
 Handle h_si_spawn_time_min;
 Handle h_si_spawn_time_limit;
 Handle h_si_spawn_time_per_survivor;
+Handle h_si_spawn_delay;
 
 int si_limit;
 int si_spawn_limits[SI_TYPES];
@@ -50,6 +51,7 @@ float si_spawn_time_min;
 float si_spawn_time_max;
 float si_spawn_time_limit;
 float si_spawn_time_per_survivor;
+float si_spawn_delay;
 int alive_survivors;
 int si_type_counts[SI_TYPES];
 int si_total_count;
@@ -96,6 +98,7 @@ public void OnPluginStart()
 	h_si_spawn_time_min = CreateConVar("l4d2_dsis_spawn_time_min", "15.0", "The min auto spawn time (seconds) for special infected", FCVAR_NONE, true, 0.0);
 	h_si_spawn_time_limit = CreateConVar("l4d2_dsis_spawn_time_limit", "60.0", "The max auto spawn time (seconds) for special infected", FCVAR_NONE, true, 1.0);
 	h_si_spawn_time_per_survivor = CreateConVar("l4d2_dsis_time_per_survivor", "3.0", "The amount of auto spawn time being reduced per alive survivor", FCVAR_NONE, true, 0.0);
+	h_si_spawn_delay = CreateConVar("l4d2_dsis_spawn_delay", "0.1", "The delay in seconds for each spawn", FCVAR_NONE, true, 0.1);
 
 	//hook events
 	HookEvent("round_end", event_round_end, EventHookMode_Pre);
@@ -114,6 +117,7 @@ public void OnConfigsExecuted()
 	si_spawn_time_min = GetConVarFloat(h_si_spawn_time_min);
 	si_spawn_time_limit = GetConVarFloat(h_si_spawn_time_limit);
 	si_spawn_time_per_survivor = GetConVarFloat(h_si_spawn_time_per_survivor);
+	si_spawn_delay = GetConVarFloat(h_si_spawn_delay);
 	set_si_spawn_limits();
 	disbale_director_spawn_si();
 }
@@ -235,6 +239,7 @@ void spawn_si()
 	PrintToConsoleAll("[DSIS] spawn_si(); si_total_count = %i; size = %i", si_total_count, size);
 	#endif
 
+	float delay = si_spawn_delay;
 	while (size > 0) {
 		int index = get_si_index();
 
@@ -243,8 +248,9 @@ void spawn_si()
 			break;
 		
 		//prevent instant spam of all specials at once
-		CreateTimer(0.2 * float(size), z_spawn_old, index);
+		CreateTimer(delay, z_spawn_old, index);
 
+		delay += si_spawn_delay;
 		size--;
 	}
 }
