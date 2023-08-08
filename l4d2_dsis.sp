@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.0.1"
+#define PLUGIN_VERSION "1.1.0"
 
 #define DEBUG 0
 
@@ -36,21 +36,21 @@ char z_spawns[SI_TYPES][16] = { "smoker auto", "boomer auto", "hunter auto", "sp
 Handle h_si_limit;
 Handle h_si_spawn_limits[SI_TYPES];
 Handle h_si_spawn_size_min;
-Handle h_si_spawn_size_per_player;
+Handle h_si_spawn_size_per_survivor;
 Handle h_si_spawn_time_min;
 Handle h_si_spawn_time_limit;
-Handle h_si_spawn_time_per_player;
+Handle h_si_spawn_time_per_survivor;
 
 int si_limit;
 int si_spawn_limits[SI_TYPES];
 int si_spawn_size_min;
 int si_spawn_size_max;
-int si_spawn_size_per_player;
+int si_spawn_size_per_survivor;
 float si_spawn_time_min;
 float si_spawn_time_max;
 float si_spawn_time_limit;
-float si_spawn_time_per_player;
-int alive_players;
+float si_spawn_time_per_survivor;
+int alive_survivors;
 int si_type_counts[SI_TYPES];
 int si_total_count;
 
@@ -90,17 +90,17 @@ public void OnPluginStart()
 	
 	//special infected spawn size
 	h_si_spawn_size_min = CreateConVar("l4d2_dsis_spawn_size_min", "1", "The min amount of special infected spawned at each spawn interval", FCVAR_NONE, true, 0.0);
-	h_si_spawn_size_per_player = CreateConVar("l4d2_dsis_spawn_size_per_player", "1", "The amount of special infected being added per alive player", FCVAR_NONE, true, 0.0);
+	h_si_spawn_size_per_survivor = CreateConVar("l4d2_dsis_spawn_size_per_survivor", "1", "The amount of special infected being added per alive survivor", FCVAR_NONE, true, 0.0);
 	
 	//special infected spawn time
 	h_si_spawn_time_min = CreateConVar("l4d2_dsis_spawn_time_min", "15.0", "The min auto spawn time (seconds) for special infected", FCVAR_NONE, true, 0.0);
 	h_si_spawn_time_limit = CreateConVar("l4d2_dsis_spawn_time_limit", "60.0", "The max auto spawn time (seconds) for special infected", FCVAR_NONE, true, 1.0);
-	h_si_spawn_time_per_player = CreateConVar("l4d2_dsis_time_per_player", "3.0", "The amount of auto spawn time being reduced per alive player", FCVAR_NONE, true, 0.0);
+	h_si_spawn_time_per_survivor = CreateConVar("l4d2_dsis_time_per_survivor", "3.0", "The amount of auto spawn time being reduced per alive survivor", FCVAR_NONE, true, 0.0);
 
 	//hook events
 	HookEvent("round_end", event_round_end, EventHookMode_Pre);
 	HookEvent("map_transition", event_round_end, EventHookMode_Pre);
-	HookEvent("player_death", player_check_on_event);
+	HookEvent("player_death", survivor_check_on_event);
 	HookEvent("player_left_safe_area", event_player_left_safe_area);
 
 	AutoExecConfig(true, "l4d2_dsis");
@@ -110,17 +110,17 @@ public void OnConfigsExecuted()
 {
 	si_limit = GetConVarInt(h_si_limit);
 	si_spawn_size_min = GetConVarInt(h_si_spawn_size_min);
-	si_spawn_size_per_player = GetConVarInt(h_si_spawn_size_per_player);
+	si_spawn_size_per_survivor = GetConVarInt(h_si_spawn_size_per_survivor);
 	si_spawn_time_min = GetConVarFloat(h_si_spawn_time_min);
 	si_spawn_time_limit = GetConVarFloat(h_si_spawn_time_limit);
-	si_spawn_time_per_player = GetConVarFloat(h_si_spawn_time_per_player);
+	si_spawn_time_per_survivor = GetConVarFloat(h_si_spawn_time_per_survivor);
 	set_si_spawn_limits();
 	disbale_director_spawn_si();
 }
 
 void set_si_spawn_limits()
 {
-	for (int i = 0; i < SI_TYPES; ++i)
+	for (int i = 0; i < SI_TYPES; i++)
 		si_spawn_limits[i] = GetConVarInt(h_si_spawn_limits[i]);
 }
 
@@ -140,48 +140,48 @@ public Action event_player_left_safe_area(Event event, const char[] name, bool d
 	PrintToConsoleAll("[DSIS] event_player_left_safe_area()");
 	#endif
 
-	player_check();
+	survivor_check();
 	start_spawn_timer();
 	return Plugin_Continue;
 }
 
-public void player_check_on_event(Event event, const char[] name, bool dontBroadcast)
+public void survivor_check_on_event(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (client && IsClientInGame(client) && GetClientTeam(client) == TEAM_SURVIVORS) {
 
 		#if DEBUG
-		PrintToConsoleAll("[DSIS] player_check_on_event()");
+		PrintToConsoleAll("[DSIS] survivor_check_on_event()");
 		#endif
 
-		player_check();
+		survivor_check();
 	}
 }
 
-void player_check()
+void survivor_check()
 {
-	alive_players = 0;
-	for (int i = 1; i <= MaxClients; ++i)
+	alive_survivors = 0;
+	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && GetClientTeam(i) == TEAM_SURVIVORS && IsPlayerAlive(i))
-			alive_players++;
+			alive_survivors++;
 	set_si_spawn_size_max();
 	set_si_spawn_time_max();
 
 	#if DEBUG
-	PrintToConsoleAll("[DSIS] player_check(); alive_players = %i; si_spawn_size_max = %i; si_spawn_time_max = %f", alive_players, si_spawn_size_max, si_spawn_time_max);
+	PrintToConsoleAll("[DSIS] survivor_check(); alive_survivors = %i; si_spawn_size_max = %i; si_spawn_time_max = %f", alive_survivors, si_spawn_size_max, si_spawn_time_max);
 	#endif
 }
 
 void set_si_spawn_size_max()
 {
-    si_spawn_size_max = si_spawn_size_min + si_spawn_size_per_player * alive_players;
+    si_spawn_size_max = si_spawn_size_min + si_spawn_size_per_survivor * alive_survivors;
     if (si_spawn_size_max > si_limit)
         si_spawn_size_max = si_limit;
 }
 
 void set_si_spawn_time_max()
 {
-    si_spawn_time_max = si_spawn_time_limit - si_spawn_time_per_player * alive_players;
+    si_spawn_time_max = si_spawn_time_limit - si_spawn_time_per_survivor * alive_survivors;
     if (si_spawn_time_max < si_spawn_time_min)
         si_spawn_time_max = si_spawn_time_min;
 }
@@ -243,7 +243,7 @@ void spawn_si()
 			break;
 		
 		//prevent instant spam of all specials at once
-		CreateTimer(0.1 * size, z_spawn_old, index);
+		CreateTimer(0.2 * size, z_spawn_old, index);
 
 		size--;
 	}
@@ -251,9 +251,9 @@ void spawn_si()
 
 void count_si()
 {
-	for (int i = 0; i < SI_TYPES; ++i)
+	for (int i = 0; i < SI_TYPES; i++)
 		si_type_counts[i] = 0;
-	for (int i = 1; i <= MaxClients; ++i) {
+	for (int i = 1; i <= MaxClients; i++) {
 		if (IsClientInGame(i) && GetClientTeam(i) == TEAM_INFECTED) {
 
 			//detect special infected type by zombie class
@@ -274,7 +274,7 @@ void count_si()
 		}
 	}
 	si_total_count = 0;
-	for (int i = 0; i < SI_TYPES; ++i)
+	for (int i = 0; i < SI_TYPES; i++)
 		si_total_count += si_type_counts[i];
 }
 
@@ -321,7 +321,7 @@ public Action z_spawn_old(Handle timer, any data)
 
 int get_any_client()
 {
-	for (int i = 1; i <= MaxClients; ++i)
+	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i))
 			return i;
 	return 0;
