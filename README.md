@@ -5,6 +5,10 @@ Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4
 
 ## Changelog
 
+Version 1.1.0
+- Config changes (requires new config).
+- Increase spawn delay.
+
 Version 1.0.1
 - Update spawn delay.
 
