@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.1.0"
+#define PLUGIN_VERSION "1.1.1"
 
 #define DEBUG 0
 
@@ -243,7 +243,7 @@ void spawn_si()
 			break;
 		
 		//prevent instant spam of all specials at once
-		CreateTimer(0.2 * size, z_spawn_old, index);
+		CreateTimer(0.2 * float(size), z_spawn_old, index);
 
 		size--;
 	}
