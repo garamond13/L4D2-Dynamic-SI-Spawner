@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.2.1"
+#define PLUGIN_VERSION "1.2.2"
 
 #define DEBUG 0
 
@@ -152,7 +152,7 @@ public Action event_player_left_safe_area(Event event, const char[] name, bool d
 public void survivor_check_on_event(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (IsClientInGame(client) && GetClientTeam(client) == TEAM_SURVIVORS) {
+	if (client && IsClientInGame(client) && GetClientTeam(client) == TEAM_SURVIVORS) {
 
 		#if DEBUG
 		PrintToConsoleAll("[DSIS] survivor_check_on_event()");
