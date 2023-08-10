@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.2.0"
+#define PLUGIN_VERSION "1.2.1"
 
 #define DEBUG 0
 
@@ -152,7 +152,7 @@ public Action event_player_left_safe_area(Event event, const char[] name, bool d
 public void survivor_check_on_event(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client && IsClientInGame(client) && GetClientTeam(client) == TEAM_SURVIVORS) {
+	if (IsClientInGame(client) && GetClientTeam(client) == TEAM_SURVIVORS) {
 
 		#if DEBUG
 		PrintToConsoleAll("[DSIS] survivor_check_on_event()");
@@ -257,31 +257,43 @@ void spawn_si()
 
 void count_si()
 {
+	//reset counts
+	si_total_count = 0;
 	for (int i = 0; i < SI_TYPES; i++)
 		si_type_counts[i] = 0;
+
 	for (int i = 1; i <= MaxClients; i++) {
 		if (IsClientInGame(i) && GetClientTeam(i) == TEAM_INFECTED) {
 
 			//detect special infected type by zombie class
 			switch (GetEntProp(i, Prop_Send, "m_zombieClass")) {
-				case SI_CLASS_SMOKER:
+				case SI_CLASS_SMOKER: {
 					si_type_counts[SI_SMOKER]++;
-				case SI_CLASS_BOOMER:
+					si_total_count++;
+				}
+				case SI_CLASS_BOOMER: {
 					si_type_counts[SI_BOOMER]++;
-				case SI_CLASS_HUNTER:
+					si_total_count++;
+				}
+				case SI_CLASS_HUNTER: {
 					si_type_counts[SI_HUNTER]++;
-				case SI_CLASS_SPITTER:
+					si_total_count++;
+				}
+				case SI_CLASS_SPITTER: {
 					si_type_counts[SI_SPITTER]++;
-				case SI_CLASS_JOCKEY:
+					si_total_count++;
+				}
+				case SI_CLASS_JOCKEY: {
 					si_type_counts[SI_JOCKEY]++;
-				case SI_CLASS_CHARGER:
+					si_total_count++;
+				}
+				case SI_CLASS_CHARGER: {
 					si_type_counts[SI_CHARGER]++;
+					si_total_count++;
+				}
 			}
 		}
 	}
-	si_total_count = 0;
-	for (int i = 0; i < SI_TYPES; i++)
-		si_total_count += si_type_counts[i];
 }
 
 //get random index
@@ -307,7 +319,13 @@ public Action z_spawn_old(Handle timer, any data)
 	if (!client)
 		return Plugin_Continue;
 	
-	create_infected_bot();
+	//create infected bot
+	int bot = CreateFakeClient("Infected Bot");
+	if (bot) {
+		ChangeClientTeam(bot, TEAM_INFECTED);
+		CreateTimer(0.1, kick_bot, bot);
+	}
+
 	int flags = GetCommandFlags("z_spawn_old");
 
 	//remove sv_cheat flag from command
@@ -331,15 +349,6 @@ int get_any_client()
 		if (IsClientInGame(i))
 			return i;
 	return 0;
-}
-
-void create_infected_bot()
-{
-	int bot = CreateFakeClient("Infected Bot");
-	if (bot) {
-		ChangeClientTeam(bot, TEAM_INFECTED);
-		CreateTimer(0.1, kick_bot, bot);
-	}
 }
 
 public Action kick_bot(Handle timer, any data)
