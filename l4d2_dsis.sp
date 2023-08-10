@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.2.2"
+#define PLUGIN_VERSION "1.3.0"
 
 #define DEBUG 0
 
@@ -103,6 +103,7 @@ public void OnPluginStart()
 	//hook events
 	HookEvent("round_end", event_round_end, EventHookMode_Pre);
 	HookEvent("map_transition", event_round_end, EventHookMode_Pre);
+	HookEvent("player_spawn", survivor_check_on_event);
 	HookEvent("player_death", survivor_check_on_event);
 	HookEvent("player_left_safe_area", event_player_left_safe_area);
 
@@ -144,7 +145,6 @@ public Action event_player_left_safe_area(Event event, const char[] name, bool d
 	PrintToConsoleAll("[DSIS] event_player_left_safe_area()");
 	#endif
 
-	survivor_check();
 	start_spawn_timer();
 	return Plugin_Continue;
 }
@@ -224,16 +224,19 @@ void spawn_si()
 	count_si();
 
 	//early return if limit is reached
-	if (si_total_count >= si_limit)
+	if (si_total_count >= si_limit) {
+		
+		#if DEBUG
+		PrintToConsoleAll("[DSIS] spawn_si(); si_total_count = %i; return", si_total_count);
+		#endif
+
 		return;
+	}
 
 	//set spawn size
-	int size;
-	if (si_spawn_size_max > si_limit - si_total_count)
-		size = si_limit - si_total_count;
-	else
-		size = si_spawn_size_max;
-	size = GetRandomInt(si_spawn_size_min, size);
+	int difference = si_limit - si_total_count;
+	int size = si_spawn_size_max > difference ? difference : si_spawn_size_max;
+	size = GetRandomInt(si_spawn_size_min > size ? size : si_spawn_size_min, size);
 
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] spawn_si(); si_total_count = %i; size = %i", si_total_count, size);
@@ -248,7 +251,7 @@ void spawn_si()
 			break;
 		
 		//prevent instant spam of all specials at once
-		CreateTimer(delay, z_spawn_old, index);
+		CreateTimer(delay, z_spawn_old, index, TIMER_FLAG_NO_MAPCHANGE);
 
 		delay += si_spawn_delay;
 		size--;
@@ -313,28 +316,33 @@ int get_si_index()
 
 public Action z_spawn_old(Handle timer, any data)
 {	
-	int client = get_any_client();
+	int client = get_random_alive_survivor();
+
+	#if DEBUG
+	PrintToConsoleAll("[DSIS] z_spawn_old(); client = %i", client);
+	#endif
 	
 	//early return on invalid client
 	if (!client)
 		return Plugin_Continue;
 	
-	//create infected bot
-	int bot = CreateFakeClient("Infected Bot");
-	if (bot) {
-		ChangeClientTeam(bot, TEAM_INFECTED);
-		CreateTimer(0.1, kick_bot, bot);
-	}
+	create_infected_bot();
 
-	int flags = GetCommandFlags("z_spawn_old");
-
+	//store user and command flags
+	int user_flags = GetUserFlagBits(client);
+	int command_flags = GetCommandFlags("z_spawn_old");
+	
+	//give user root admin (only teporarly)
+	SetUserFlagBits(client, ADMFLAG_ROOT);
+	
 	//remove sv_cheat flag from command
-	SetCommandFlags("z_spawn_old", flags & ~FCVAR_CHEAT);
+	SetCommandFlags("z_spawn_old", command_flags & ~FCVAR_CHEAT);
 
 	FakeClientCommand(client, "%s %s", "z_spawn_old", z_spawns[data]);
 	
-	//restore command flags
-	SetCommandFlags("z_spawn_old", flags);
+	//restore command and user flags
+	SetCommandFlags("z_spawn_old", command_flags);
+	SetUserFlagBits(client, user_flags);
 
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] z_spawn_old(); z_spawns[%i] = %s", data, z_spawns[data]);
@@ -343,12 +351,26 @@ public Action z_spawn_old(Handle timer, any data)
 	return Plugin_Continue;
 }
 
-int get_any_client()
+int get_random_alive_survivor()
 {
-	for (int i = 1; i <= MaxClients; i++)
-		if (IsClientInGame(i))
-			return i;
+	if (alive_survivors) {
+		int[] clients = new int[alive_survivors];
+		int index = 0;
+		for (int i = 1; i <= MaxClients; i++)
+			if (IsClientInGame(i) && GetClientTeam(i) == TEAM_SURVIVORS && IsPlayerAlive(i))
+				clients[index++] = i;
+		return clients[GetRandomInt(0, alive_survivors - 1)];
+	}
 	return 0;
+}
+
+void create_infected_bot()
+{
+	int bot = CreateFakeClient("Infected Bot");
+	if (bot) {
+		ChangeClientTeam(bot, TEAM_INFECTED);
+		CreateTimer(0.1, kick_bot, bot, TIMER_FLAG_NO_MAPCHANGE);
+	}
 }
 
 public Action kick_bot(Handle timer, any data)
