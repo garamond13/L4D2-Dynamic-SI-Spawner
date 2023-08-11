@@ -5,6 +5,10 @@ Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4
 
 ## Changelog
 
+Version 1.3.0
+- Now special infected are spawning on random survivor.
+- Fixed some errors.
+
 Version 1.2.1
 - Micro optimizations.
 
