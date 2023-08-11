@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.3.0"
+#define PLUGIN_VERSION "1.3.1"
 
 #define DEBUG 0
 
@@ -236,7 +236,7 @@ void spawn_si()
 	//set spawn size
 	int difference = si_limit - si_total_count;
 	int size = si_spawn_size_max > difference ? difference : si_spawn_size_max;
-	size = GetRandomInt(si_spawn_size_min > size ? size : si_spawn_size_min, size);
+	size = si_spawn_size_min < size ? GetRandomInt(si_spawn_size_min, size) : size;
 
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] spawn_si(); si_total_count = %i; size = %i", si_total_count, size);
