@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.3.2"
+#define PLUGIN_VERSION "1.3.3"
 
 #define DEBUG 0
 
@@ -129,7 +129,7 @@ void disbale_director_spawn_si()
 	SetConVarInt(FindConVar("z_charger_limit"), 0);
 }
 
-public Action event_player_left_safe_area(Event event, const char[] name, bool dontBroadcast)
+Action event_player_left_safe_area(Event event, const char[] name, bool dontBroadcast)
 {
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] event_player_left_safe_area()");
@@ -139,7 +139,7 @@ public Action event_player_left_safe_area(Event event, const char[] name, bool d
 	return Plugin_Continue;
 }
 
-public void survivor_check_on_event(Event event, const char[] name, bool dontBroadcast)
+void survivor_check_on_event(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (client && IsClientInGame(client) && GetClientTeam(client) == TEAM_SURVIVORS) {
@@ -201,7 +201,7 @@ void end_spawn_timer()
 }
 
 //gets called by start_spawn_timer()
-public Action auto_spawn_si(Handle timer)
+Action auto_spawn_si(Handle timer)
 {
 	is_spawn_timer_started = false;
 	spawn_si();
@@ -210,7 +210,7 @@ public Action auto_spawn_si(Handle timer)
 }
 
 void spawn_si()
-{   
+{
 	count_si();
 
 	//early return if limit is reached
@@ -304,7 +304,7 @@ int get_si_index()
 	return -1;
 }
 
-public Action z_spawn_old(Handle timer, any data)
+Action z_spawn_old(Handle timer, any data)
 {	
 	int client = get_random_alive_survivor();
 
@@ -316,7 +316,12 @@ public Action z_spawn_old(Handle timer, any data)
 	if (!client)
 		return Plugin_Continue;
 	
-	create_infected_bot();
+	//create infected bot
+	int bot = CreateFakeClient("Infected Bot");
+	if (bot) {
+		ChangeClientTeam(bot, TEAM_INFECTED);
+		CreateTimer(0.1, kick_bot, bot, TIMER_FLAG_NO_MAPCHANGE);
+	}
 
 	//store user and command flags
 	int user_flags = GetUserFlagBits(client);
@@ -354,23 +359,14 @@ int get_random_alive_survivor()
 	return 0;
 }
 
-void create_infected_bot()
-{
-	int bot = CreateFakeClient("Infected Bot");
-	if (bot) {
-		ChangeClientTeam(bot, TEAM_INFECTED);
-		CreateTimer(0.1, kick_bot, bot, TIMER_FLAG_NO_MAPCHANGE);
-	}
-}
-
-public Action kick_bot(Handle timer, any data)
+Action kick_bot(Handle timer, any data)
 {
 	if (IsClientInGame(data) && !IsClientInKickQueue(data) && IsFakeClient(data))
 		KickClient(data);
 	return Plugin_Continue;
 }
 
-public Action event_round_end(Event event, const char[] name, bool dontBroadcast)
+Action event_round_end(Event event, const char[] name, bool dontBroadcast)
 {
 	end_spawn_timer();
 	return Plugin_Continue;
