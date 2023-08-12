@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.3.3"
+#define PLUGIN_VERSION "1.3.4"
 
 #define DEBUG 0
 
@@ -323,21 +323,16 @@ Action z_spawn_old(Handle timer, any data)
 		CreateTimer(0.1, kick_bot, bot, TIMER_FLAG_NO_MAPCHANGE);
 	}
 
-	//store user and command flags
-	int user_flags = GetUserFlagBits(client);
-	int command_flags = GetCommandFlags("z_spawn_old");
-	
-	//give user root admin (only teporarly)
-	SetUserFlagBits(client, ADMFLAG_ROOT);
+	//store command flags
+	int flags = GetCommandFlags("z_spawn_old");
 	
 	//remove sv_cheat flag from command
-	SetCommandFlags("z_spawn_old", command_flags & ~FCVAR_CHEAT);
+	SetCommandFlags("z_spawn_old", flags & ~FCVAR_CHEAT);
 
 	FakeClientCommand(client, "%s %s", "z_spawn_old", z_spawns[data]);
 	
-	//restore command and user flags
-	SetCommandFlags("z_spawn_old", command_flags);
-	SetUserFlagBits(client, user_flags);
+	//restore command flags
+	SetCommandFlags("z_spawn_old", flags);
 
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] z_spawn_old(); z_spawns[%i] = %s", data, z_spawns[data]);
