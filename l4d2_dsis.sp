@@ -4,7 +4,7 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.3.1"
+#define PLUGIN_VERSION "1.3.2"
 
 #define DEBUG 0
 
@@ -60,23 +60,13 @@ int si_total_count;
 Handle h_spawn_timer;
 bool is_spawn_timer_started;
 
-public Plugin myinfo =  
-{
+public Plugin myinfo = {
 	name = "L4D2 Dynamic SI Spawner",
 	author = "Garamond",
 	description = "Dynamic special infected spawner",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/garamond13/L4D2-Dynamic-SI-Spawner"
 };
-
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) 
-{	
-	if(GetEngineVersion() != Engine_Left4Dead2) {
-		strcopy(error, err_max, "Plugin only supports Left 4 Dead 2.");
-		return APLRes_SilentFailure;
-	}
-	return APLRes_Success; 
-}
 
 public void OnPluginStart()
 {
