@@ -1,10 +1,11 @@
-#pragma newdecls required
 #pragma semicolon 1
 
 #include <sourcemod>
 #include <sdktools>
 
-#define PLUGIN_VERSION "1.3.4"
+#pragma newdecls required
+
+#define PLUGIN_VERSION "1.3.5"
 
 #define DEBUG 0
 
@@ -129,7 +130,7 @@ void disbale_director_spawn_si()
 	SetConVarInt(FindConVar("z_charger_limit"), 0);
 }
 
-Action event_player_left_safe_area(Event event, const char[] name, bool dontBroadcast)
+public Action event_player_left_safe_area(Event event, const char[] name, bool dontBroadcast)
 {
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] event_player_left_safe_area()");
@@ -139,7 +140,7 @@ Action event_player_left_safe_area(Event event, const char[] name, bool dontBroa
 	return Plugin_Continue;
 }
 
-void survivor_check_on_event(Event event, const char[] name, bool dontBroadcast)
+public void survivor_check_on_event(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (client && IsClientInGame(client) && GetClientTeam(client) == TEAM_SURVIVORS) {
@@ -201,7 +202,7 @@ void end_spawn_timer()
 }
 
 //gets called by start_spawn_timer()
-Action auto_spawn_si(Handle timer)
+public Action auto_spawn_si(Handle timer)
 {
 	is_spawn_timer_started = false;
 	spawn_si();
@@ -304,7 +305,7 @@ int get_si_index()
 	return -1;
 }
 
-Action z_spawn_old(Handle timer, any data)
+public Action z_spawn_old(Handle timer, any data)
 {	
 	int client = get_random_alive_survivor();
 
@@ -354,14 +355,14 @@ int get_random_alive_survivor()
 	return 0;
 }
 
-Action kick_bot(Handle timer, any data)
+public Action kick_bot(Handle timer, any data)
 {
 	if (IsClientInGame(data) && !IsClientInKickQueue(data) && IsFakeClient(data))
 		KickClient(data);
 	return Plugin_Continue;
 }
 
-Action event_round_end(Event event, const char[] name, bool dontBroadcast)
+public Action event_round_end(Event event, const char[] name, bool dontBroadcast)
 {
 	end_spawn_timer();
 	return Plugin_Continue;
