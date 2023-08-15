@@ -5,7 +5,7 @@
 
 #pragma newdecls required
 
-#define PLUGIN_VERSION "1.3.5"
+#define PLUGIN_VERSION "4.0.0"
 
 #define DEBUG 0
 
@@ -36,6 +36,7 @@ char z_spawns[SI_TYPES][16] = { "smoker auto", "boomer auto", "hunter auto", "sp
 //convar handles
 Handle h_si_limit;
 Handle h_si_spawn_limits[SI_TYPES];
+Handle h_si_spawn_weights[SI_TYPES];
 Handle h_si_spawn_size_min;
 Handle h_si_spawn_size_per_survivor;
 Handle h_si_spawn_time_min;
@@ -45,6 +46,8 @@ Handle h_si_spawn_delay;
 
 int si_limit;
 int si_spawn_limits[SI_TYPES];
+int si_spawn_weights[SI_TYPES];
+int si_spawn_wsum;
 int si_spawn_size_min;
 int si_spawn_size_max;
 int si_spawn_size_per_survivor;
@@ -80,6 +83,14 @@ public void OnPluginStart()
 	h_si_spawn_limits[SI_SPITTER] = CreateConVar("l4d2_dsis_spitter_limit", "1", "The max amount of spitters present at once", FCVAR_NONE, true, 0.0);
 	h_si_spawn_limits[SI_JOCKEY] = CreateConVar("l4d2_dsis_jockey_limit", "1", "The max amount of jockeys present at once", FCVAR_NONE, true, 0.0);
 	h_si_spawn_limits[SI_CHARGER] = CreateConVar("l4d2_dsis_charger_limit", "1", "The max amount of chargers present at once", FCVAR_NONE, true, 0.0);
+
+	//special infected weights
+	h_si_spawn_weights[SI_SMOKER] = CreateConVar("l4d2_dsis_smoker_weight", "100", "The weight for a smoker spawning", FCVAR_NONE, true, 1.0, true, 100.0);
+	h_si_spawn_weights[SI_BOOMER] = CreateConVar("l4d2_dsis_boomer_weight", "100", "The weight for a boomer spawning", FCVAR_NONE, true, 1.0, true, 100.0);
+	h_si_spawn_weights[SI_HUNTER] = CreateConVar("l4d2_dsis_hunter_weight", "100", "The weight for a hunter spawning", FCVAR_NONE, true, 1.0, true, 100.0);
+	h_si_spawn_weights[SI_SPITTER] = CreateConVar("l4d2_dsis_spitter_weight", "100", "The weight for a spitter spawning", FCVAR_NONE, true, 1.0, true, 100.0);
+	h_si_spawn_weights[SI_JOCKEY] = CreateConVar("l4d2_dsis_jockey_weight", "100", "The weight for a jockey spawning", FCVAR_NONE, true, 1.0, true, 100.0);
+	h_si_spawn_weights[SI_CHARGER] = CreateConVar("l4d2_dsis_charger_weight", "100", "The weight for a charger spawning", FCVAR_NONE, true, 1.0, true, 100.0);
 	
 	//special infected spawn size
 	h_si_spawn_size_min = CreateConVar("l4d2_dsis_spawn_size_min", "1", "The min amount of special infected spawned at each spawn interval", FCVAR_NONE, true, 0.0);
@@ -111,6 +122,7 @@ public void OnConfigsExecuted()
 	si_spawn_time_per_survivor = GetConVarFloat(h_si_spawn_time_per_survivor);
 	si_spawn_delay = GetConVarFloat(h_si_spawn_delay);
 	set_si_spawn_limits();
+	set_si_spawn_weights();
 	disbale_director_spawn_si();
 }
 
@@ -118,6 +130,14 @@ void set_si_spawn_limits()
 {
 	for (int i = 0; i < SI_TYPES; i++)
 		si_spawn_limits[i] = GetConVarInt(h_si_spawn_limits[i]);
+}
+
+void set_si_spawn_weights()
+{
+	for (int i = 0; i < SI_TYPES; i++) {
+		si_spawn_weights[i] = GetConVarInt(h_si_spawn_weights[i]);
+		si_spawn_wsum += si_spawn_weights[i];
+	}
 }
 
 void disbale_director_spawn_si()
@@ -295,7 +315,26 @@ int get_si_index()
 {
 	int retries = 5;
 	while (retries > 0) {
-		int index = GetRandomInt(0, SI_TYPES - 1);
+		int tmp_wsum = 0;
+		int index = GetRandomInt(1, si_spawn_wsum);
+		
+		#if DEBUG
+		PrintToConsoleAll("[DSIS] get_si_index(); GetRandomInt() = %i", index);
+		#endif
+		
+		//cycle trough weight ranges, find where random index falls and pick appropriate array index
+		for (int i = 0; i < SI_TYPES; i++) {
+			tmp_wsum += si_spawn_weights[i];
+			if (index <= tmp_wsum) {
+				index = i;
+				break;
+			}
+		}
+
+		#if DEBUG
+		PrintToConsoleAll("[DSIS] get_si_index(); tmp_wsum = %i; si_spawn_wsum = %i; index = %i", tmp_wsum, si_spawn_wsum, index);
+		#endif
+
 		if (si_type_counts[index] < si_spawn_limits[index]) {
 			si_type_counts[index]++;
 			return index;
