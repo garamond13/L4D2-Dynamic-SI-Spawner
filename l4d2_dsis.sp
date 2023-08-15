@@ -1,11 +1,9 @@
-#pragma semicolon 1
-
 #include <sourcemod>
-#include <sdktools>
 
+#pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "2.0.0"
+#define PLUGIN_VERSION "2.0.1"
 
 #define DEBUG 0
 
@@ -322,7 +320,7 @@ int get_si_index()
 		PrintToConsoleAll("[DSIS] get_si_index(); GetRandomInt() = %i", index);
 		#endif
 		
-		//cycle trough weight ranges, find where random index falls and pick appropriate array index
+		//cycle trough weight ranges, find where the random index falls and pick an appropriate array index
 		for (int i = 0; i < SI_TYPES; i++) {
 			tmp_wsum += si_spawn_weights[i];
 			if (index <= tmp_wsum) {
