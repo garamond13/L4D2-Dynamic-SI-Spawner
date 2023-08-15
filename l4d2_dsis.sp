@@ -1,9 +1,10 @@
 #include <sourcemod>
+#include <sdktools>
 
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "2.0.1"
+#define PLUGIN_VERSION "2.0.2"
 
 #define DEBUG 0
 
