@@ -8,6 +8,9 @@ Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4
 Version 2.0.1
 - Small change.
 
+Version 2.0.1
+- Small change.
+
 Version 2.0.0
 - Implement spawn weights (requires new config).
 
