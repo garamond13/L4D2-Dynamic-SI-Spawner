@@ -5,6 +5,9 @@ Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4
 
 ## Changelog
 
+Version 3.0.0
+- Implement weight reduction factors.
+
 Version 2.0.2
 - Small change.
 
