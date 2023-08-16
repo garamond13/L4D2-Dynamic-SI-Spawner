@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "3.0.0"
+#define PLUGIN_VERSION "3.1.0"
 
 #define DEBUG 0
 
@@ -93,12 +93,12 @@ public void OnPluginStart()
 	h_si_spawn_weights[SI_CHARGER] = CreateConVar("l4d2_dsis_charger_weight", "100", "The weight for a charger spawning", FCVAR_NONE, true, 1.0, true, 100.0);
 
 	//special infected weight reduction factors
-	h_si_spawn_weight_reduction_factors[SI_SMOKER] = CreateConVar("l4d2_dsis_smoker_weight_reduction_factor", "1.0", "The weight reduction factor for a smoker spawning", FCVAR_NONE, true, 0.01, true, 1.0);
-	h_si_spawn_weight_reduction_factors[SI_BOOMER] = CreateConVar("l4d2_dsis_boomer_weight_reduction_factor", "1.0", "The weight reduction factor for a boomer spawning", FCVAR_NONE, true, 0.01, true, 1.0);
-	h_si_spawn_weight_reduction_factors[SI_HUNTER] = CreateConVar("l4d2_dsis_hunter_weight_reduction_factor", "1.0", "The weight reduction factor for a hunter spawning", FCVAR_NONE, true, 0.01, true, 1.0);
-	h_si_spawn_weight_reduction_factors[SI_SPITTER] = CreateConVar("l4d2_dsis_spitter_weight_reduction_factor", "1.0", "The weight reduction factor for a spitter spawning", FCVAR_NONE, true, 0.01, true, 1.0);
-	h_si_spawn_weight_reduction_factors[SI_JOCKEY] = CreateConVar("l4d2_dsis_jockey_weight_reduction_factor", "1.0", "The weight reduction factor for a jockey spawning", FCVAR_NONE, true, 0.01, true, 1.0);
-	h_si_spawn_weight_reduction_factors[SI_CHARGER] = CreateConVar("l4d2_dsis_charger_weight_reduction_factor", "1.0", "The weight reduction factor for a charger spawning", FCVAR_NONE, true, 0.01, true, 1.0);
+	h_si_spawn_weight_reduction_factors[SI_SMOKER] = CreateConVar("l4d2_dsis_smoker_weight_reduction_factor", "1.0", "The weight reduction factor for each next smoker spawning", FCVAR_NONE, true, 0.01, true, 1.0);
+	h_si_spawn_weight_reduction_factors[SI_BOOMER] = CreateConVar("l4d2_dsis_boomer_weight_reduction_factor", "1.0", "The weight reduction factor for each next boomer spawning", FCVAR_NONE, true, 0.01, true, 1.0);
+	h_si_spawn_weight_reduction_factors[SI_HUNTER] = CreateConVar("l4d2_dsis_hunter_weight_reduction_factor", "1.0", "The weight reduction factor for each next hunter spawning", FCVAR_NONE, true, 0.01, true, 1.0);
+	h_si_spawn_weight_reduction_factors[SI_SPITTER] = CreateConVar("l4d2_dsis_spitter_weight_reduction_factor", "1.0", "The weight reduction factor for each next spitter spawning", FCVAR_NONE, true, 0.01, true, 1.0);
+	h_si_spawn_weight_reduction_factors[SI_JOCKEY] = CreateConVar("l4d2_dsis_jockey_weight_reduction_factor", "1.0", "The weight reduction factor for each next jockey spawning", FCVAR_NONE, true, 0.01, true, 1.0);
+	h_si_spawn_weight_reduction_factors[SI_CHARGER] = CreateConVar("l4d2_dsis_charger_weight_reduction_factor", "1.0", "The weight reduction factor for each next charger spawning", FCVAR_NONE, true, 0.01, true, 1.0);
 	
 	//special infected spawn size
 	h_si_spawn_size_min = CreateConVar("l4d2_dsis_spawn_size_min", "1", "The min amount of special infected spawned at each spawn interval", FCVAR_NONE, true, 0.0);
