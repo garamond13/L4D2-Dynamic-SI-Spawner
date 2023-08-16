@@ -5,7 +5,10 @@ Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4
 
 ## Changelog
 
-Version 3.0.0
+Version 3.1.0 (requires new config)
+- Change settings description.
+
+Version 3.0.0 (requires new config)
 - Implement weight reduction factors.
 
 Version 2.0.2
