@@ -4,6 +4,10 @@ L4D2 Dynamic SI Spawner is an auto special infected spawner focused on more dyna
 Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4d2_autoIS_extend_cn
 
 ## Changelog
+
+Version 3.2.1
+- Small change.
+
 Version 3.2.0 (requires new config)
 - Change options.
 
