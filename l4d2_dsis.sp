@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "3.2.1"
+#define VERSION "3.2.2"
 
 #define DEBUG 0
 
@@ -260,7 +260,8 @@ void spawn_si()
 	//set spawn size
 	int difference = si_limit - si_total_count;
 	int size = si_spawn_size_max > difference ? difference : si_spawn_size_max;
-	size = si_spawn_size_min < size ? GetRandomInt(si_spawn_size_min, size) : size;
+	if (si_spawn_size_min < size)
+		size = GetRandomInt(si_spawn_size_min, size);
 
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] spawn_si(); si_total_count = %i; size = %i", si_total_count, size);
