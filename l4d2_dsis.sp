@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "3.2.0"
+#define VERSION "3.2.1"
 
 #define DEBUG 0
 
@@ -68,7 +68,7 @@ public Plugin myinfo = {
 	name = "L4D2 Dynamic SI Spawner",
 	author = "Garamond",
 	description = "Dynamic special infected spawner",
-	version = PLUGIN_VERSION,
+	version = VERSION,
 	url = "https://github.com/garamond13/L4D2-Dynamic-SI-Spawner"
 };
 
@@ -425,10 +425,9 @@ public Action kick_bot(Handle timer, any data)
 	return Plugin_Continue;
 }
 
-public Action event_round_end(Event event, const char[] name, bool dontBroadcast)
+public void event_round_end(Event event, const char[] name, bool dontBroadcast)
 {
 	end_spawn_timer();
-	return Plugin_Continue;
 }
 
 public void OnMapEnd()
