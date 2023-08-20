@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "3.2.2"
+#define VERSION "3.2.3"
 
 #define DEBUG 0
 
@@ -30,7 +30,7 @@
 #define SI_CHARGER 5
 
 //keep same order as zombie classes
-char z_spawns[SI_TYPES][16] = { "smoker auto", "boomer auto", "hunter auto", "spitter auto", "jockey auto", "charger auto" };
+char z_spawns[SI_TYPES][8] = { "smoker", "boomer", "hunter", "spitter", "jockey", "charger" };
 
 //convar handles
 Handle h_si_limit;
@@ -394,7 +394,7 @@ public Action z_spawn_old(Handle timer, any data)
 	//remove sv_cheat flag from command
 	SetCommandFlags("z_spawn_old", flags & ~FCVAR_CHEAT);
 
-	FakeClientCommand(client, "%s %s", "z_spawn_old", z_spawns[data]);
+	FakeClientCommand(client, "z_spawn_old %s auto", z_spawns[data]);
 	
 	//restore command flags
 	SetCommandFlags("z_spawn_old", flags);
