@@ -5,6 +5,9 @@ Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4
 
 ## Changelog
 
+Version 3.3.0 (requires new config)
+- Implement spawn delay min and max.
+
 Version 3.2.3
 - Micro optimizations.
 
