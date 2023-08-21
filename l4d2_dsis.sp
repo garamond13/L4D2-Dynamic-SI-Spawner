@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "3.2.3"
+#define VERSION "3.3.0"
 
 #define DEBUG 0
 
@@ -42,7 +42,8 @@ Handle h_si_spawn_size_per_survivor;
 Handle h_si_spawn_time_min;
 Handle h_si_spawn_time_limit;
 Handle h_si_spawn_time_per_survivor;
-Handle h_si_spawn_delay;
+Handle h_si_spawn_delay_min;
+Handle h_si_spawn_delay_max;
 
 int si_limit;
 int si_spawn_limits[SI_TYPES];
@@ -55,7 +56,8 @@ float si_spawn_time_min;
 float si_spawn_time_max;
 float si_spawn_time_limit;
 float si_spawn_time_per_survivor;
-float si_spawn_delay;
+float si_spawn_delay_min;
+float si_spawn_delay_max;
 int alive_survivors;
 int si_type_counts[SI_TYPES];
 int si_total_count;
@@ -101,14 +103,15 @@ public void OnPluginStart()
 	h_si_spawn_weight_reduction_factors[SI_CHARGER] = CreateConVar("l4d2_dsis_charger_factor", "1.0", "The weight reduction factor for each next charger spawning", FCVAR_NONE, true, 0.01, true, 1.0);
 	
 	//special infected spawn size
-	h_si_spawn_size_min = CreateConVar("l4d2_dsis_spawn_size_min", "1", "The min amount of special infected spawned at each spawn interval", FCVAR_NONE, true, 0.0);
-	h_si_spawn_size_per_survivor = CreateConVar("l4d2_dsis_spawn_size_per_survivor", "1", "The amount of special infected being added per alive survivor", FCVAR_NONE, true, 0.0);
+	h_si_spawn_size_min = CreateConVar("l4d2_dsis_size_min", "1", "The min amount of special infected spawned at each spawn interval", FCVAR_NONE, true, 0.0);
+	h_si_spawn_size_per_survivor = CreateConVar("l4d2_dsis_size_per_survivor", "1", "The amount of special infected being added per alive survivor", FCVAR_NONE, true, 0.0);
 	
 	//special infected spawn time
-	h_si_spawn_time_min = CreateConVar("l4d2_dsis_spawn_time_min", "15.0", "The min auto spawn time (seconds) for special infected", FCVAR_NONE, true, 0.0);
-	h_si_spawn_time_limit = CreateConVar("l4d2_dsis_spawn_time_limit", "60.0", "The max auto spawn time (seconds) for special infected", FCVAR_NONE, true, 1.0);
+	h_si_spawn_time_min = CreateConVar("l4d2_dsis_time_min", "15.0", "The min auto spawn time (seconds) for special infected", FCVAR_NONE, true, 0.0);
+	h_si_spawn_time_limit = CreateConVar("l4d2_dsis_time_limit", "60.0", "The max auto spawn time (seconds) for special infected", FCVAR_NONE, true, 1.0);
 	h_si_spawn_time_per_survivor = CreateConVar("l4d2_dsis_time_per_survivor", "3.0", "The amount of auto spawn time being reduced per alive survivor", FCVAR_NONE, true, 0.0);
-	h_si_spawn_delay = CreateConVar("l4d2_dsis_spawn_delay", "0.1", "The delay in seconds for each spawn", FCVAR_NONE, true, 0.1);
+	h_si_spawn_delay_min = CreateConVar("l4d2_dsis_delay_min", "0.1", "The min delay in seconds for each spawn", FCVAR_NONE, true, 0.1);
+	h_si_spawn_delay_max = CreateConVar("l4d2_dsis_delay_max", "1.0", "The max delay in seconds for each spawn", FCVAR_NONE, true, 0.1);
 
 	//hook events
 	HookEvent("round_end", event_round_end, EventHookMode_Pre);
@@ -128,7 +131,10 @@ public void OnConfigsExecuted()
 	si_spawn_time_min = GetConVarFloat(h_si_spawn_time_min);
 	si_spawn_time_limit = GetConVarFloat(h_si_spawn_time_limit);
 	si_spawn_time_per_survivor = GetConVarFloat(h_si_spawn_time_per_survivor);
-	si_spawn_delay = GetConVarFloat(h_si_spawn_delay);
+	si_spawn_delay_min = GetConVarFloat(h_si_spawn_delay_min);
+	si_spawn_delay_max = GetConVarFloat(h_si_spawn_delay_max);
+	if (si_spawn_delay_min > si_spawn_delay_max)
+		si_spawn_delay_min = si_spawn_delay_max;
 	set_si_spawn_limits();
 	set_si_spawn_weights();
 	set_si_spawn_weight_recudcion_factors();
@@ -267,7 +273,7 @@ void spawn_si()
 	PrintToConsoleAll("[DSIS] spawn_si(); si_total_count = %i; size = %i", si_total_count, size);
 	#endif
 
-	float delay = si_spawn_delay;
+	float delay = 0.0;
 	while (size > 0) {
 		int index = get_si_index();
 
@@ -276,9 +282,9 @@ void spawn_si()
 			break;
 		
 		//prevent instant spam of all specials at once
+		delay += GetRandomFloat(si_spawn_delay_min, si_spawn_delay_max);
 		CreateTimer(delay, z_spawn_old, index, TIMER_FLAG_NO_MAPCHANGE);
 
-		delay += si_spawn_delay;
 		size--;
 	}
 }
