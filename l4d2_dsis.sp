@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "3.3.0"
+#define VERSION "3.3.1"
 
 #define DEBUG 0
 
@@ -297,7 +297,7 @@ void count_si()
 		si_type_counts[i] = 0;
 
 	for (int i = 1; i <= MaxClients; i++) {
-		if (IsClientInGame(i) && GetClientTeam(i) == TEAM_INFECTED) {
+		if (IsClientInGame(i) && GetClientTeam(i) == TEAM_INFECTED && IsPlayerAlive(i)) {
 
 			//detect special infected type by zombie class
 			switch (GetEntProp(i, Prop_Send, "m_zombieClass")) {
