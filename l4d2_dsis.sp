@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "3.3.1"
+#define VERSION "3.3.2"
 
 #define DEBUG 0
 
@@ -125,6 +125,7 @@ public void OnPluginStart()
 
 public void OnConfigsExecuted()
 {
+	//get convars
 	si_limit = GetConVarInt(h_si_limit);
 	si_spawn_size_min = GetConVarInt(h_si_spawn_size_min);
 	si_spawn_size_per_survivor = GetConVarInt(h_si_spawn_size_per_survivor);
@@ -135,33 +136,13 @@ public void OnConfigsExecuted()
 	si_spawn_delay_max = GetConVarFloat(h_si_spawn_delay_max);
 	if (si_spawn_delay_min > si_spawn_delay_max)
 		si_spawn_delay_min = si_spawn_delay_max;
-	set_si_spawn_limits();
-	set_si_spawn_weights();
-	set_si_spawn_weight_recudcion_factors();
-	disbale_director_spawn_si();
-}
-
-void set_si_spawn_limits()
-{
-	for (int i = 0; i < SI_TYPES; i++)
+	for (int i = 0; i < SI_TYPES; i++) {
 		si_spawn_limits[i] = GetConVarInt(h_si_spawn_limits[i]);
-}
-
-void set_si_spawn_weights()
-{
-
-	for (int i = 0; i < SI_TYPES; i++)
 		si_spawn_weights[i] = GetConVarInt(h_si_spawn_weights[i]);
-}
-
-void set_si_spawn_weight_recudcion_factors()
-{
-	for (int i = 0; i < SI_TYPES; i++)
 		si_spawn_weight_reduction_factors[i] = GetConVarFloat(h_si_spawn_weight_reduction_factors[i]);
-}
+	}
 
-void disbale_director_spawn_si()
-{
+	//disbale director spawn special infected
 	SetConVarInt(FindConVar("z_smoker_limit"), 0);
 	SetConVarInt(FindConVar("z_boomer_limit"), 0);
 	SetConVarInt(FindConVar("z_hunter_limit"), 0);
@@ -198,26 +179,20 @@ void survivor_check()
 	for (int i = 1; i <= MaxClients; i++)
 		if (IsClientInGame(i) && GetClientTeam(i) == TEAM_SURVIVORS && IsPlayerAlive(i))
 			alive_survivors++;
-	set_si_spawn_size_max();
-	set_si_spawn_time_max();
+	
+	//set si_spawn_size_max
+	si_spawn_size_max = si_spawn_size_min + si_spawn_size_per_survivor * alive_survivors;
+	if (si_spawn_size_max > si_limit)
+		si_spawn_size_max = si_limit;
+	
+	//set si_spawn_time_max
+	si_spawn_time_max = si_spawn_time_limit - si_spawn_time_per_survivor * alive_survivors;
+	if (si_spawn_time_max < si_spawn_time_min)
+		si_spawn_time_max = si_spawn_time_min;
 
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] survivor_check(); alive_survivors = %i; si_spawn_size_max = %i; si_spawn_time_max = %f", alive_survivors, si_spawn_size_max, si_spawn_time_max);
 	#endif
-}
-
-void set_si_spawn_size_max()
-{
-    si_spawn_size_max = si_spawn_size_min + si_spawn_size_per_survivor * alive_survivors;
-    if (si_spawn_size_max > si_limit)
-        si_spawn_size_max = si_limit;
-}
-
-void set_si_spawn_time_max()
-{
-    si_spawn_time_max = si_spawn_time_limit - si_spawn_time_per_survivor * alive_survivors;
-    if (si_spawn_time_max < si_spawn_time_min)
-        si_spawn_time_max = si_spawn_time_min;
 }
 
 void start_spawn_timer()
