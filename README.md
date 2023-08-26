@@ -5,6 +5,9 @@ Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4
 
 ## Changelog
 
+Version 3.3.2
+- Micro optimizations.
+
 Version 3.3.1
 - Small change.
 
