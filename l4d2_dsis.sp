@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "3.4.0"
+#define VERSION "3.4.1"
 
 #define DEBUG 0
 
@@ -58,6 +58,7 @@ float si_spawn_time_limit;
 float si_spawn_time_per_survivor;
 float si_spawn_delay_min;
 float si_spawn_delay_max;
+float si_spawn_delay_limit;
 int alive_survivors;
 int si_type_counts[SI_TYPES];
 int si_total_count;
@@ -141,6 +142,8 @@ public void OnConfigsExecuted()
 		si_spawn_weights[i] = GetConVarInt(h_si_spawn_weights[i]);
 		si_spawn_weight_reduction_factors[i] = GetConVarFloat(h_si_spawn_weight_reduction_factors[i]);
 	}
+	
+	si_spawn_delay_limit = si_spawn_time_min - 0.1;
 
 	//disbale director spawn special infected
 	SetConVarInt(FindConVar("z_smoker_limit"), 0);
@@ -249,7 +252,6 @@ void spawn_si()
 	#endif
 
 	float delay = 0.0;
-	float delay_limit = si_spawn_time_min - 0.1;
 	while (size > 0) {
 		int index = get_si_index();
 
@@ -259,8 +261,8 @@ void spawn_si()
 		
 		//prevent instant spam of all specials at once
 		delay += GetRandomFloat(si_spawn_delay_min, si_spawn_delay_max);
-		if (delay > delay_limit)
-			delay = delay_limit;
+		if (delay > si_spawn_delay_limit)
+			delay = si_spawn_delay_limit;
 		CreateTimer(delay, z_spawn_old, index, TIMER_FLAG_NO_MAPCHANGE);
 
 		size--;
