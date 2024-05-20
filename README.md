@@ -1,9 +1,20 @@
 # L4D2 Dynamic SI Spawner
 
 L4D2 Dynamic SI Spawner is an auto special infected spawner focused on more dynamic spawning. It's made to be lite and highly efficient.\
+Config (dsis.cfg) should be created on the first run and located in left4dead2\cfg\sourcemod folder.
+
+Note that some functionalities like disableling/enabeling plugin via console, disabling for versus are not implemented.
+
 Mostly inspired by https://github.com/wyxls/SourceModPlugins-L4D2/tree/master/l4d2_autoIS_extend_cn
 
+## Compilation
+
+To compile it into .smx SourceMod plugin you can use the [SourceMod Plugin Compiler](https://www.sourcemod.net/compiler.php).
+
 ## Changelog
+
+Version 4.0.0
+- Major changes.
 
 Version 3.4.1
 - Small change.
