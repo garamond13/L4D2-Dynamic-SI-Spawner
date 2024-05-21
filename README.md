@@ -13,6 +13,9 @@ To compile it into .smx SourceMod plugin you can use the [SourceMod Plugin Compi
 
 ## Changelog
 
+Version 4.0.1
+- Edit convar descriptions.
+
 Version 4.0.0
 - Major changes.
 

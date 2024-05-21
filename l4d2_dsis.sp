@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "4.0.0"
+#define VERSION "4.0.1"
 
 #define DEBUG 0
 
@@ -113,12 +113,12 @@ public void OnPluginStart()
 	h_si_spawn_sizes_max = CreateConVar("dsis_sizes_max", "2 2 3 3 4 4 5 5", "Max amount of SI spawned at each spawn interval for NO. alive survivors (1-8). Also the limit of SI present at the same time.", FCVAR_NONE);
 	
 	// Special infected spawn times.
-	h_si_spawn_times_min = CreateConVar("dsis_times_min", "20.0 20.0 22.0 22.0 24.0 24.0 26.0 26.0", "Min auto spawn time in seconds for SI.", FCVAR_NONE);
-	h_si_spawn_times_max = CreateConVar("dsis_times_max", "60.0 60.0 62.0 62.0 64.0 64.0 66.0 66.0", "Max auto spawn time in seconds for SI.", FCVAR_NONE);
+	h_si_spawn_times_min = CreateConVar("dsis_times_min", "20.0 20.0 22.0 22.0 24.0 24.0 26.0 26.0", "Min SI spawn interval in seconds for for NO. alive survivors (1-8).", FCVAR_NONE);
+	h_si_spawn_times_max = CreateConVar("dsis_times_max", "60.0 60.0 62.0 62.0 64.0 64.0 66.0 66.0", "Max SI spawn interval in seconds for for NO. alive survivors (1-8).", FCVAR_NONE);
 	
 	// Special infected spawn delays.
-	h_si_spawn_delay_min = CreateConVar("dsis_delay_min", "0.4", "Min delay in seconds for each spawn.", FCVAR_NONE, true, 0.1);
-	h_si_spawn_delay_max = CreateConVar("dsis_delay_max", "2.0", "Max delay in seconds for each spawn.", FCVAR_NONE, true, 0.1);
+	h_si_spawn_delay_min = CreateConVar("dsis_delay_min", "0.4", "Min delay in seconds for each individual SI spawn.", FCVAR_NONE, true, 0.1);
+	h_si_spawn_delay_max = CreateConVar("dsis_delay_max", "2.0", "Max delay in seconds for each individual SI spawn.", FCVAR_NONE, true, 0.1);
 
 	h_count_tanks = CreateConVar("dsis_count_tanks", "1", "Will aggroed tanks be counted as SI.", FCVAR_NONE, true, 0.0, true, 1.0);
 
@@ -451,7 +451,7 @@ Action fake_z_spawn_old(Handle timer, any data)
 	return Plugin_Continue;
 }
 
-public void event_round_end(Event event, const char[] name, bool dontBroadcast)
+void event_round_end(Event event, const char[] name, bool dontBroadcast)
 {
 	end_spawn_timer();
 }
