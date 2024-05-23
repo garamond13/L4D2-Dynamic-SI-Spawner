@@ -4,7 +4,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define VERSION "4.0.2"
+#define VERSION "4.0.3"
 
 #define DEBUG 0
 
@@ -69,6 +69,7 @@ bool count_tanks;
 Handle h_spawn_timer;
 bool is_spawn_timer_running;
 
+// Used as array index.
 int alive_survivors;
 
 // Used by GetVScriptOutput().
@@ -251,6 +252,8 @@ void count_alive_survivors()
 	#if DEBUG
 	PrintToConsoleAll("[DSIS] count_alive_survivors(): alive_survivors = %i", alive_survivors);
 	#endif
+	
+	alive_survivors = clamp(alive_survivors - 1, 0, 7);
 }
 
 void event_player_left_safe_area(Event event, const char[] name, bool dontBroadcast)
@@ -521,4 +524,12 @@ stock int get_random_alive_survivor()
 		if (IsClientInGame(i) && GetClientTeam(i) == 2 && IsPlayerAlive(i))
 			clients[index++] = i; // We can't know who's last, so index will overflow!
 	return index ? clients[GetRandomInt(0, index - 1)] : 0;
+}
+
+/*
+Returns clamped val between min and max.
+*/
+stock int clamp(int val, int min, int max)
+{
+	return val > max ? max : (val < min ? min : val);
 }
