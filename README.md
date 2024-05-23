@@ -13,6 +13,9 @@ To compile it into .smx SourceMod plugin you can use the [SourceMod Plugin Compi
 
 ## Changelog
 
+Version 4.0.2
+- Remove redundant FCVAR_NONE flag from some cvars.
+
 Version 4.0.1
 - Edit convar descriptions.
 
